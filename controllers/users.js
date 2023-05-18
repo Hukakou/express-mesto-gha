@@ -21,9 +21,6 @@ const getUserById = (req, res) => {
 
 const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
-  console.log(name);
-  console.log(about);
-  console.log(avatar);
 
   User.create({ name, about, avatar })
     .then((user) => {
@@ -42,17 +39,23 @@ const createUser = (req, res) => {
 
 const updateUser = (req, res) => {
   const { name, about } = req.body;
+  console.log(about);
 
-  User.findByIdAndUpdate(req.user._id, { name, about })
+  User.findByIdAndUpdate(
+    req.user._id,
+    { name, about },
+    { new: true, runValidators: true }
+  )
     .then((user) => res.status(201).send({ data: user }))
     .catch((err) => res.status(500).send({ message: err.message }));
 };
 
 const updateAvatar = (req, res) => {
   const { avatar } = req.body;
+  console.log("ты тут");
 
   User.findByIdAndUpdate(req.user._id, { avatar })
-    .then((user) => res.status(201).send({ data: user }))
+    .then((user) => res.status(200).send({ data: user }))
     .catch((err) => res.status(500).send({ message: err.message }));
 };
 
