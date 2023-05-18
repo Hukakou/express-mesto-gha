@@ -26,7 +26,13 @@ addLikeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } },
     { new: true }
   )
-    .then((card) => res.status(201).send(card))
+    .then((card) => {
+      if (!card) {
+        return res.status(404).send({ message: "Not found: Invalid _id" });
+      } else {
+        res.status(201).send(card);
+      }
+    })
     .catch((err) => res.status(400).send({ message: err.message }));
 };
 
@@ -36,8 +42,14 @@ deleteLikeCard = (req, res) => {
     { $pull: { likes: req.user._id } },
     { new: true }
   )
-    .then((card) => res.status(201).send(card))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .then((card) => {
+      if (!card) {
+        return res.status(404).send({ message: "Not found: Invalid _id" });
+      } else {
+        res.status(200).send(card);
+      }
+    })
+    .catch((err) => res.status(400).send({ message: err.message }));
 };
 
 module.exports = {
