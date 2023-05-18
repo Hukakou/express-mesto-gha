@@ -22,7 +22,7 @@ mongoose
 
 app.use((req, res, next) => {
   req.user = {
-    _id: "64626e70858638ceb1f5cb89", // временный хардкод
+    _id: "64663857f1c81c18a5f53958", // временный хардкод
   };
 
   next();

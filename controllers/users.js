@@ -1,12 +1,4 @@
 const User = require("../models/user");
-const {
-  ERROR_CODE_VALIDATION_ERROR,
-  ERROR_CODE_NOT_FOUND,
-  ERROR_CODE_DEFAULT,
-  dafaultErrorMessage,
-} = require("../errors/errors");
-
-console.log(User);
 
 const getUsers = (req, res) => {
   User.find({})
@@ -16,10 +8,11 @@ const getUsers = (req, res) => {
 
 const getUserById = (req, res) => {
   const { id } = req.params;
+  console.log(id);
   User.findById(id)
     .then((user) => {
       if (!user) {
-        return res.status(404).send({ message: "User is not found" });
+        return res.status(404).send({ message: "User is not found тест" });
       } else {
         res.send(user);
       }
@@ -40,7 +33,7 @@ const createUser = (req, res) => {
     .catch((err) => {
       if (err.name === "ValidationError") {
         return res
-          .status(ERROR_CODE_VALIDATION_ERROR)
+          .status(400)
           .send({ message: "переданы некорректные данные" });
       } else {
         return res.status(500).send({ message: err.message });
