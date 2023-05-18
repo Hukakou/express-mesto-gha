@@ -1,4 +1,10 @@
 const User = require("../models/user");
+const {
+  ERROR_CODE_VALIDATION_ERROR,
+  ERROR_CODE_NOT_FOUND,
+  ERROR_CODE_DEFAULT,
+  dafaultErrorMessage,
+} = require("../errors/errors");
 
 console.log(User);
 
@@ -32,7 +38,13 @@ const createUser = (req, res) => {
       res.status(201).send(user);
     })
     .catch((err) => {
-      res.status(500).send({ message: "Server Error" });
+      if (err.name === "ValidationError") {
+        return res
+          .status(ERROR_CODE_VALIDATION_ERROR)
+          .send({ message: "переданы некорректные данные" });
+      } else {
+        return res.status(500).send({ message: err.message });
+      }
     });
 };
 
