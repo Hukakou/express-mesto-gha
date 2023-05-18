@@ -2,7 +2,7 @@ const Card = require("../models/card");
 
 getCards = (req, res) => {
   Card.find({})
-    .then((cards) => res.status(201).send(cards))
+    .then((cards) => res.status(200).send(cards))
     .catch((err) => res.status(500).send({ message: err.message }));
 };
 
@@ -11,7 +11,7 @@ createCard = (req, res) => {
 
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.status(201).send(card))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => res.status(400).send({ message: err.message }));
 };
 
 deleteCard = (req, res) => {
@@ -27,7 +27,7 @@ addLikeCard = (req, res) => {
     { new: true }
   )
     .then((card) => res.status(201).send(card))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => res.status(400).send({ message: err.message }));
 };
 
 deleteLikeCard = (req, res) => {
