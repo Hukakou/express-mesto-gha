@@ -16,8 +16,14 @@ createCard = (req, res) => {
 
 deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
-    .then((card) => res.status(201).send(card))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .then((card) => {
+      if (!card) {
+        return res.status(404).send({ message: "Not found: Invalid _id" });
+      } else {
+        res.status(200).send(card);
+      }
+    })
+    .catch((err) => res.status(400).send({ message: err.message }));
 };
 
 addLikeCard = (req, res) => {
