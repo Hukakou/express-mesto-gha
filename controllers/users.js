@@ -16,7 +16,17 @@ const getUserById = (req, res) => {
         res.send(user);
       }
     })
-    .catch((err) => res.status(500).send({ message: "Server Error" }));
+    .catch((err) => {
+      if (err.name === "CastError") {
+        return res.status(400).send({ message: "Bad Request" });
+      }
+      if (err.name === "DocumentNotFoundError") {
+        return res
+          .status(404)
+          .send({ message: "User with _id cannot be found" });
+      }
+      return res.status(500).send({ message: "Server Error" });
+    });
 };
 
 const createUser = (req, res) => {
@@ -54,7 +64,7 @@ const updateAvatar = (req, res) => {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(req.user._id, { avatar })
-    .then((user) => res.status(200).send({ data: user.avatar }))
+    .then((user) => res.status(200).send({ user }))
     .catch((err) => res.status(500).send({ message: err.message }));
 };
 
