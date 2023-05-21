@@ -9,7 +9,7 @@ const {
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch(() => handleError);
+    .catch((err) => handleError(err, res));
 };
 
 const getUserById = (req, res) => {
@@ -22,7 +22,7 @@ const getUserById = (req, res) => {
           .send({ message: 'User is not found' });
       } return res.send(user);
     })
-    .catch(() => handleError);
+    .catch((err) => handleError(err, res));
 };
 
 const createUser = (req, res) => {
@@ -32,7 +32,7 @@ const createUser = (req, res) => {
     .then((user) => {
       res.status(HTTP_STATUS_CREATED).send(user);
     })
-    .catch(() => handleError);
+    .catch((err) => handleError(err, res));
 };
 
 const updateUser = (req, res) => {
@@ -44,7 +44,7 @@ const updateUser = (req, res) => {
     { new: true, runValidators: true },
   )
     .then((user) => res.status(HTTP_STATUS_OK).send({ data: user }))
-    .catch(() => handleError);
+    .catch((err) => handleError(err, res));
 };
 
 const updateAvatar = (req, res) => {
@@ -52,7 +52,7 @@ const updateAvatar = (req, res) => {
 
   User.findByIdAndUpdate(req.user._id, { avatar })
     .then(() => res.status(HTTP_STATUS_OK).send({ avatar }))
-    .catch(() => handleError);
+    .catch((err) => handleError(err, res));
 };
 
 module.exports = {

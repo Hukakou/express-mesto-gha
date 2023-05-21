@@ -9,7 +9,7 @@ const {
 const getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.status(HTTP_STATUS_OK).send(cards))
-    .catch(() => handleError);
+    .catch((err) => handleError(err, res));
 };
 
 const createCard = (req, res) => {
@@ -17,7 +17,7 @@ const createCard = (req, res) => {
 
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.status(HTTP_STATUS_CREATED).send(card))
-    .catch(() => handleError);
+    .catch((err) => handleError(err, res));
 };
 
 const deleteCard = (req, res) => {
@@ -30,7 +30,7 @@ const deleteCard = (req, res) => {
       }
       return res.status(HTTP_STATUS_OK).send(card);
     })
-    .catch(() => handleError);
+    .catch((err) => handleError(err, res));
 };
 
 const addLikeCard = (req, res) => {
@@ -46,7 +46,7 @@ const addLikeCard = (req, res) => {
           .send({ message: 'Неправильный id' });
       } return res.status(HTTP_STATUS_CREATED).send(card);
     })
-    .catch(() => handleError);
+    .catch((err) => handleError(err, res));
 };
 
 const deleteLikeCard = (req, res) => {
@@ -62,7 +62,7 @@ const deleteLikeCard = (req, res) => {
           .send({ message: 'Неправильный id' });
       } return res.status(HTTP_STATUS_OK).send(card);
     })
-    .catch(() => handleError);
+    .catch((err) => handleError(err, res));
 };
 
 module.exports = {
