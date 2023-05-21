@@ -1,29 +1,37 @@
 const Card = require("../models/card");
+const {
+  handleError,
+  HTTP_STATUS_OK,
+  HTTP_STATUS_CREATED,
+  HTTP_STATUS_NOT_FOUND,
+} = require("../constants/constants");
 
 getCards = (req, res) => {
   Card.find({})
-    .then((cards) => res.status(200).send(cards))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .then((cards) => res.status(HTTP_STATUS_OK).send(cards))
+    .catch((err) => handleError);
 };
 
 createCard = (req, res) => {
   const { name, link } = req.body;
 
   Card.create({ name, link, owner: req.user._id })
-    .then((card) => res.status(201).send(card))
-    .catch((err) => res.status(400).send({ message: err.message }));
+    .then((card) => res.status(HTTP_STATUS_CREATED).send(card))
+    .catch((err) => handleError);
 };
 
 deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (!card) {
-        return res.status(404).send({ message: "Not found: Invalid _id" });
+        return res
+          .status(HTTP_STATUS_NOT_FOUND)
+          .send({ message: "Неправильный id" });
       } else {
-        res.status(200).send(card);
+        res.status(HTTP_STATUS_OK).send(card);
       }
     })
-    .catch((err) => res.status(400).send({ message: err.message }));
+    .catch((err) => handleError);
 };
 
 addLikeCard = (req, res) => {
@@ -34,12 +42,14 @@ addLikeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        return res.status(404).send({ message: "Not found: Invalid _id" });
+        return res
+          .status(HTTP_STATUS_NOT_FOUND)
+          .send({ message: "Неправильный id" });
       } else {
-        res.status(201).send(card);
+        res.status(HTTP_STATUS_CREATED).send(card);
       }
     })
-    .catch((err) => res.status(400).send({ message: err.message }));
+    .catch((err) => handleError);
 };
 
 deleteLikeCard = (req, res) => {
@@ -50,12 +60,14 @@ deleteLikeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        return res.status(404).send({ message: "Not found: Invalid _id" });
+        return res
+          .status(HTTP_STATUS_NOT_FOUND)
+          .send({ message: "Неправильный id" });
       } else {
-        res.status(200).send(card);
+        res.status(HTTP_STATUS_OK).send(card);
       }
     })
-    .catch((err) => res.status(400).send({ message: err.message }));
+    .catch((err) => handleError);
 };
 
 module.exports = {
