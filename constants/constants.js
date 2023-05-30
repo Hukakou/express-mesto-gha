@@ -1,29 +1,27 @@
 const http2 = require('node:http2');
+const NotFoundError = require('../errors/NotFoundError');
+const BadRequestError = require('../errors/BadRequestError');
+const ConflictError = require('../errors/ConflictError');
 
 const {
   HTTP_STATUS_OK,
   HTTP_STATUS_CREATED,
-  HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_NOT_FOUND,
-  HTTP_STATUS_INTERNAL_SERVER_ERROR,
 } = http2.constants;
 
 // console.log(http2.constants); // Все статусы
 
-const handleError = (err, res) => {
+const handleError = (err, next) => {
   if (err.name === 'ValidationError' || err.name === 'CastError') {
-    return res
-      .status(HTTP_STATUS_BAD_REQUEST)
-      .send({ message: 'Переданы некорректные данные' });
+    return next(new BadRequestError('Передан некорректный id'));
   }
   if (err.name === 'DocumentNotFoundError') {
-    return res
-      .status(HTTP_STATUS_NOT_FOUND)
-      .send({ message: 'Пользователь с данным id не был найден' });
+    return next(new NotFoundError('Данные с указанным id не найдены.'));
   }
-  return res
-    .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)
-    .send({ message: 'Ошибка сервера' });
+  if (err.name === 'DocumentNotFoundError') {
+    return next(new ConflictError('Пользователь с указанным e-mail уже зарегистрирован.'));
+  }
+  return next(err);
 };
 
 module.exports = {

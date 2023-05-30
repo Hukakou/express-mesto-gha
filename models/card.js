@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const validator = require('validator');
 
 const cardSchema = new mongoose.Schema({
   name: {
@@ -9,6 +11,10 @@ const cardSchema = new mongoose.Schema({
   },
   link: {
     type: String,
+    validate: {
+      validator: (url) => validator.isURL(url),
+      message: 'Некорректная ссылка на изображение',
+    },
     required: true,
   },
   owner: {
@@ -17,7 +23,7 @@ const cardSchema = new mongoose.Schema({
     required: true,
   },
   likes: {
-    type: mongoose.Schema.Types.Array,
+    type: [mongoose.Schema.Types.Array],
     ref: 'user',
     default: [],
   },

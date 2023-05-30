@@ -1,4 +1,5 @@
 const Card = require('../models/card');
+const ForbiddenError = require('../errors/ForbiddenError');
 const {
   handleError,
   HTTP_STATUS_OK,
@@ -6,34 +7,38 @@ const {
   HTTP_STATUS_NOT_FOUND,
 } = require('../constants/constants');
 
-const getCards = (req, res) => {
+const getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.status(HTTP_STATUS_OK).send(cards))
-    .catch((err) => handleError(err, res));
+    .catch(next);
 };
 
-const createCard = (req, res) => {
+const createCard = (req, res, next) => {
   const { name, link } = req.body;
 
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.status(HTTP_STATUS_CREATED).send(card))
-    .catch((err) => handleError(err, res));
+    .catch(next);
 };
 
-const deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
+const deleteCard = (req, res, next) => {
+  const userId = req.user._id;
+
+  Card.findById(req.params.cardId)
+    .orFail()
     .then((card) => {
-      if (!card) {
-        return res
-          .status(HTTP_STATUS_NOT_FOUND)
-          .send({ message: 'Неправильный id' });
+      const ownerId = card.owner.toString();
+      if (ownerId !== userId) {
+        throw new ForbiddenError('К сожалению вы не автор данной карточки');
       }
-      return res.status(HTTP_STATUS_OK).send(card);
+      return card;
     })
-    .catch((err) => handleError(err, res));
+    .then((card) => Card.deleteOne(card))
+    .then((card) => res.status(HTTP_STATUS_OK).send(card))
+    .catch((err) => handleError(err, next));
 };
 
-const addLikeCard = (req, res) => {
+const addLikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
@@ -46,15 +51,16 @@ const addLikeCard = (req, res) => {
           .send({ message: 'Неправильный id' });
       } return res.status(HTTP_STATUS_CREATED).send(card);
     })
-    .catch((err) => handleError(err, res));
+    .catch((err) => handleError(err, next));
 };
 
-const deleteLikeCard = (req, res) => {
+const deleteLikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
     { new: true },
   )
+    .orFail()
     .then((card) => {
       if (!card) {
         return res
@@ -62,7 +68,7 @@ const deleteLikeCard = (req, res) => {
           .send({ message: 'Неправильный id' });
       } return res.status(HTTP_STATUS_OK).send(card);
     })
-    .catch((err) => handleError(err, res));
+    .catch((err) => handleError(err, next));
 };
 
 module.exports = {

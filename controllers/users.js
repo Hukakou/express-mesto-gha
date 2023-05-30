@@ -1,41 +1,94 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
+const bcrypt = require('bcryptjs');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const jwt = require('jsonwebtoken');
+const NotFoundError = require('../errors/NotFoundError');
+const UnauthorizedError = require('../errors/UnauthorizedError');
+
+const { NODE_ENV, JWT_SECRET } = process.env;
 const User = require('../models/user');
 const {
   handleError,
   HTTP_STATUS_OK,
   HTTP_STATUS_CREATED,
-  HTTP_STATUS_NOT_FOUND,
 } = require('../constants/constants');
 
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch((err) => handleError(err, res));
+    .catch(next);
 };
 
-const getUserById = (req, res) => {
+const getUser = (req, res, next) => {
+  User.findById(req.user._id)
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Пользователь по указанному id не найден');
+      }
+      res.status(HTTP_STATUS_OK)
+        .send(user);
+    })
+    .catch((err) => handleError(err, next));
+};
+
+const getUserById = (req, res, next) => {
   const { userId } = req.params;
   User.findById(userId)
     .then((user) => {
       if (!user) {
-        return res
-          .status(HTTP_STATUS_NOT_FOUND)
-          .send({ message: 'User is not found' });
+        throw new NotFoundError('Пользователь по указанному id не найден');
       } return res.send(user);
     })
-    .catch((err) => handleError(err, res));
+    .catch((err) => handleError(err, next));
 };
 
-const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+const createUser = (req, res, next) => {
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
 
-  User.create({ name, about, avatar })
-    .then((user) => {
-      res.status(HTTP_STATUS_CREATED).send(user);
+  bcrypt.hash(password, 10)
+    .then((hash) => {
+      User.create({
+        name, about, avatar, email, password: hash,
+      })
+        .then((user) => {
+          res.status(HTTP_STATUS_CREATED).send(user);
+        })
+        .catch((err) => handleError(err, next));
     })
-    .catch((err) => handleError(err, res));
+    .catch(next);
 };
 
-const updateUser = (req, res) => {
+const login = (req, res, next) => {
+  const { email, password } = req.body;
+
+  User.findOne({ email }).select('+password')
+    .then((user) => {
+      if (!user) {
+        return next(new UnauthorizedError('Неправильные почта или пароль.'));
+      }
+
+      return bcrypt.compare(password, user.password)
+        .then((matched) => {
+          if (!matched) {
+            return next(new UnauthorizedError('Неправильные почта или пароль.'));
+          }
+
+          const token = jwt.sign(
+            { _id: user._id },
+            NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+            { expiresIn: '7d' },
+          );
+
+          return res.send({ token });
+        });
+    })
+
+    .catch(next);
+};
+
+const updateUser = (req, res, next) => {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(
@@ -43,22 +96,29 @@ const updateUser = (req, res) => {
     { name, about },
     { new: true, runValidators: true },
   )
-    .then((user) => res.status(HTTP_STATUS_OK).send({ data: user }))
-    .catch((err) => handleError(err, res));
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Пользователь не найден');
+      }
+      res.status(HTTP_STATUS_OK).send({ data: user });
+    })
+    .catch((err) => handleError(err, next));
 };
 
-const updateAvatar = (req, res) => {
+const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
-  User.findByIdAndUpdate(req.user._id, { avatar })
+  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then(() => res.status(HTTP_STATUS_OK).send({ avatar }))
-    .catch((err) => handleError(err, res));
+    .catch((err) => handleError(err, next));
 };
 
 module.exports = {
   getUsers,
+  getUser,
   getUserById,
   createUser,
   updateUser,
   updateAvatar,
+  login,
 };
