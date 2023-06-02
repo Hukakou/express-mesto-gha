@@ -56,7 +56,12 @@ const createUser = (req, res, next) => {
           const noPassword = user.toObject({ useProjection: true });
           res.status(HTTP_STATUS_CREATED).send(noPassword);
         })
-        .catch((err) => handleError(err, next));
+        .catch((err) => {
+          if (err.code === 11000) {
+            return res.status(409).send({ message: 'Пользователь с указанным e-mail уже существует' });
+          }
+          return handleError(err, next);
+        });
     })
     .catch(next);
 };
