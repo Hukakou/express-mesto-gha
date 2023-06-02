@@ -53,7 +53,8 @@ const createUser = (req, res, next) => {
         name, about, avatar, email, password: hash,
       })
         .then((user) => {
-          res.status(HTTP_STATUS_CREATED).send(user);
+          const noPassword = user.toObject({ useProjection: true });
+          res.status(HTTP_STATUS_CREATED).send(noPassword);
         })
         .catch((err) => handleError(err, next));
     })
