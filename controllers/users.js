@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const NotFoundError = require('../errors/NotFoundError');
 const UnauthorizedError = require('../errors/UnauthorizedError');
+const ConflictError = require('../errors/ConflictError');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 const User = require('../models/user');
@@ -57,7 +58,7 @@ const createUser = (req, res, next) => {
         })
         .catch((err) => {
           if (err.code === 11000) {
-            return res.status(409).send({ message: 'Пользователь с указанным e-mail уже существует' });
+            throw new ConflictError('Пользователь с указанным e-mail уже существует');
           }
           return handleError(err, next);
         });
@@ -114,7 +115,12 @@ const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
-    .then(() => res.status(HTTP_STATUS_OK).send({ avatar }))
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Пользователь не найден');
+      }
+      res.status(HTTP_STATUS_OK).send({ avatar });
+    })
     .catch((err) => handleError(err, next));
 };
 

@@ -1,10 +1,10 @@
 const Card = require('../models/card');
+const NotFoundError = require('../errors/NotFoundError');
 const ForbiddenError = require('../errors/ForbiddenError');
 const {
   handleError,
   HTTP_STATUS_OK,
   HTTP_STATUS_CREATED,
-  HTTP_STATUS_NOT_FOUND,
 } = require('../constants/constants');
 
 const getCards = (req, res, next) => {
@@ -46,10 +46,8 @@ const addLikeCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        return res
-          .status(HTTP_STATUS_NOT_FOUND)
-          .send({ message: 'Неправильный id' });
-      } return res.status(HTTP_STATUS_CREATED).send(card);
+        throw new NotFoundError('Неправильный id');
+      } return res.status(HTTP_STATUS_OK).send(card);
     })
     .catch((err) => handleError(err, next));
 };
@@ -63,9 +61,7 @@ const deleteLikeCard = (req, res, next) => {
     .orFail()
     .then((card) => {
       if (!card) {
-        return res
-          .status(HTTP_STATUS_NOT_FOUND)
-          .send({ message: 'Неправильный id' });
+        throw new NotFoundError('Неправильный id');
       } return res.status(HTTP_STATUS_OK).send(card);
     })
     .catch((err) => handleError(err, next));

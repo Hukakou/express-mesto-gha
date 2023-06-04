@@ -1,10 +1,10 @@
-/* eslint-disable no-console */
 const express = require('express');
 const mongoose = require('mongoose');
 const { errors } = require('celebrate');
 const { createUserJoi, loginJoi } = require('./middlewares/celebrate');
 const auth = require('./middlewares/auth');
 const router = require('./routes/router');
+const validation = require('./middlewares/validation');
 const {
   createUser,
   login,
@@ -22,20 +22,7 @@ app.post('/signup', createUserJoi, createUser);
 app.use(auth);
 app.use(router);
 app.use(errors());
-
-app.use((err, req, res, next) => {
-  const {
-    status = 500,
-    message,
-  } = err;
-  res.status(status)
-    .send({
-      message: status === 500
-        ? 'На сервере произошла ошибка'
-        : message,
-    });
-  next();
-});
+app.use(validation);
 
 mongoose
   .connect(mongodbURL)
