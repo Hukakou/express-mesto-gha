@@ -1,8 +1,6 @@
 /* eslint-disable no-console */
 const express = require('express');
 const mongoose = require('mongoose');
-// eslint-disable-next-line no-unused-vars, import/no-extraneous-dependencies
-const dotenv = require('dotenv').config();
 const { errors } = require('celebrate');
 const { createUserJoi, loginJoi } = require('./middlewares/celebrate');
 const auth = require('./middlewares/auth');
@@ -21,8 +19,8 @@ const app = express();
 app.use(express.json());
 app.post('/signin', loginJoi, login);
 app.post('/signup', createUserJoi, createUser);
-app.use(router);
 app.use(auth);
+app.use(router);
 app.use(errors());
 
 app.use((err, req, res, next) => {
