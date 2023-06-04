@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const NotFoundError = require('../errors/NotFoundError');
 const UnauthorizedError = require('../errors/UnauthorizedError');
 
-const { NODE_ENV, JWT_SECRET } = process.env;
+// const { NODE_ENV, JWT_SECRET } = process.env;
 const User = require('../models/user');
 const {
   handleError,
@@ -82,7 +82,8 @@ const login = (req, res, next) => {
 
           const token = jwt.sign(
             { _id: user._id },
-            NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+            '18a53ca252ff9cd849e3d79756639a7c',
+            // NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
             { expiresIn: '7d' },
           );
 
