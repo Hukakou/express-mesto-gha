@@ -22,6 +22,7 @@ app.post('/signup', createUserJoi, createUser);
 app.use(auth);
 app.use(router);
 app.use(errors());
+
 app.use(validation);
 
 mongoose
