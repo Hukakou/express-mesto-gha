@@ -23,7 +23,7 @@ const getUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Пользователь по указанному id не найден');
+        next(new NotFoundError('Пользователь по указанному id не найден'));
       }
       res.status(HTTP_STATUS_OK)
         .send(user);
@@ -36,7 +36,7 @@ const getUserById = (req, res, next) => {
   User.findById(userId)
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Пользователь по указанному id не найден');
+        return next(new NotFoundError('Пользователь по указанному id не найден'));
       } return res.send(user);
     })
     .catch((err) => handleError(err, next));
@@ -104,7 +104,7 @@ const updateUser = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Пользователь не найден');
+        next(new NotFoundError('Пользователь не найден'));
       }
       res.status(HTTP_STATUS_OK).send({ data: user });
     })
@@ -117,7 +117,7 @@ const updateAvatar = (req, res, next) => {
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Пользователь не найден');
+        next(new NotFoundError('Пользователь не найден'));
       }
       res.status(HTTP_STATUS_OK).send({ avatar });
     })
