@@ -29,7 +29,7 @@ const deleteCard = (req, res, next) => {
     .then((card) => {
       const ownerId = card.owner.toString();
       if (ownerId !== userId) {
-        throw new ForbiddenError('К сожалению вы не автор данной карточки');
+        return next(new ForbiddenError('К сожалению вы не автор данной карточки'));
       }
       return card;
     })
@@ -46,7 +46,7 @@ const addLikeCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Неправильный id');
+        return next(new NotFoundError('Неправильный id'));
       } return res.status(HTTP_STATUS_OK).send(card);
     })
     .catch((err) => handleError(err, next));
@@ -61,7 +61,7 @@ const deleteLikeCard = (req, res, next) => {
     .orFail()
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Неправильный id');
+        return next(new NotFoundError('Неправильный id'));
       } return res.status(HTTP_STATUS_OK).send(card);
     })
     .catch((err) => handleError(err, next));
