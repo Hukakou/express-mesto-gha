@@ -4,7 +4,6 @@ const { errors } = require('celebrate');
 const { createUserJoi, loginJoi } = require('./middlewares/celebrate');
 const auth = require('./middlewares/auth');
 const router = require('./routes/router');
-const validation = require('./middlewares/validation');
 const {
   createUser,
   login,
@@ -23,7 +22,19 @@ app.use(auth);
 app.use(router);
 app.use(errors());
 
-app.use(validation);
+app.use((error, request, res, next) => {
+  const {
+    status = 500,
+    message,
+  } = error;
+  res.status(status)
+    .send({
+      message: status === 500
+        ? 'На сервере произошла ошибка'
+        : message,
+    });
+  next();
+});
 
 mongoose
   .connect(mongodbURL)
