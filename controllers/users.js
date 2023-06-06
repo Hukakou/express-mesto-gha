@@ -104,7 +104,7 @@ const updateUser = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        next(new NotFoundError('Пользователь не найден'));
+        throw NotFoundError('Пользователь не найден');
       }
       res.status(HTTP_STATUS_OK).send({ data: user });
     })
